@@ -1,3 +1,5 @@
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import UserManager
 from django.db import models
 from datetime import date, time
 from django.utils import timezone
@@ -7,15 +9,20 @@ from django.utils import timezone
 # Store the user details in the database and assign a unique primary key (PK) to each user.
 # Ensure the email is unique; if the email already exists, return an error message.
 
-class User(models.Model):
-    email = models.EmailField(primary_key=True, null=False)
-    name = models.CharField(null=False,max_length=20)
-    username = models.CharField(null=False,max_length=20)
-    password = models.CharField(null=False,max_length=20)
+class User(AbstractBaseUser):
+    id = models.AutoField(primary_key=True)
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=30, default="")
+    username = models.CharField(max_length=30, default="")
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    # passsword field comes from abstract user
+    # password = models.CharField(null=False, max_length=20)
+    USERNAME_FIELD = 'email'
+    objects = UserManager()
 
-    class Meta:
-        unique_together = ('email', 'username')
-
+    def __str__(self):
+        return self.email
 
 # class Events(models.Model):
 #     LOCATION = {
