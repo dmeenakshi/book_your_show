@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
-from book_shows.models import User
+from book_shows.models import User, Events
 
 
-class registration(APIView):
+class Registration(APIView):
     def verify_if_user_exists(self, email):
         # check if user is already present
         users_details = User.objects.filter(email=email).exists()
@@ -30,7 +30,7 @@ class registration(APIView):
             return Response(data={"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class login(APIView):
+class Login(APIView):
     # permission_classes = (permissions.AllowAny,)
     def authenticate(self, request, email=None, password=None, **kwrgs):
         try:
@@ -54,3 +54,32 @@ class login(APIView):
                 })
         except Exception as e:
             return Response({'error': "Invalid email or password"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class CreateEvents(APIView):
+    # /create_event
+    def post(self, request):
+        title = request.GET.get('title')
+        description = request.GET.get('description')
+        location = request.GET.get('location')
+        ticket_available = int(request.GET.get('ticket_available'))
+        try:
+            Events.objects.create(title=title, description=description,
+                                  location=location, tickets=ticket_available)
+            # event_obj.save()
+            return Response({"message": "Event is created"}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            Response({"error": f"Something went wrong here,{e}!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class BookShow(APIView):
+#     def post(self, request):
+#         try:
+#             # email id and event name
+#             email_id = request.GET.get('email')
+#             event_name = request.GET.get('event_name')
+#             if User.objects.filter(email=email_id).exists:
+#                 print(User.objects.filter(email=email_id))
+#             return Response("Booking is done!")
+#         except Exception as e:
+#             return Response({"error": "Something went wrong"}, status=status.HTTP_400_BAD_REQUEST)

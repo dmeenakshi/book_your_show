@@ -5,9 +5,11 @@ from datetime import date, time
 from django.utils import timezone
 
 
-# Create an endpoint /register that accepts email, name, username, and password.
-# Store the user details in the database and assign a unique primary key (PK) to each user.
-# Ensure the email is unique; if the email already exists, return an error message.
+class Role(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(null=False, unique=True, max_length=100)
+    description = models.TextField(blank=True, null=True)
+
 
 class User(AbstractBaseUser):
     id = models.AutoField(primary_key=True)
@@ -16,29 +18,28 @@ class User(AbstractBaseUser):
     username = models.CharField(max_length=30, default="")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
-    # passsword field comes from abstract user
-    # password = models.CharField(null=False, max_length=20)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
     USERNAME_FIELD = 'email'
     objects = UserManager()
 
     def __str__(self):
         return self.email
 
-# class Events(models.Model):
-#     LOCATION = {
-#         "BLR": "Bangalore",
-#         "HYD": "Hyderabad",
-#         "PUNE": "Pune",
-#         "CHEN": "Chennai"
-#     }
-#     title = models.CharField(null=False)
-#     description = models.CharField(null=False)
-#     event_created_on = models.DateField(default=date.today)
-#     event_created_at = models.TimeField(default=timezone.now().time())
-#     location = models.CharField(max_length=4, choices=LOCATION)
-#     tickets = models.IntegerField(null=False)
-#
-#
-# class Booking(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     event = models.ForeignKey(Events, on_delete=models.CASCADE)
+
+class Events(models.Model):
+    class location_choices(models.TextChoices):
+        BLR = "Bangalore"
+        HYD = "Hyderabad"
+        PUNE = "Pune"
+        CHEN = "Chennai"
+    title = models.CharField(unique=True, max_length=250)
+    description = models.CharField(null=False, max_length=250)
+    event_created_on = models.DateField(default=date.today)
+    event_created_at = models.TimeField(default=timezone.now)
+    location = models.CharField(max_length=9, choices=location_choices.choices)
+    tickets = models.IntegerField(null=False)
+
+
+class Booking(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event = models.ForeignKey(Events, on_delete=models.CASCADE)
